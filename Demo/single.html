@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>HTML5 uploader</title>
+
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.9.0/build/base/base-min.css">
+<link rel="stylesheet" type="text/css" media="all" href="css/style.css" />
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/mootools/1.4.0/mootools-yui-compressed.js"></script>
+<script type="text/javascript" src="../Source/DropZone/Request.Blob.js"></script>
+<script type="text/javascript" src="../Source/DropZone/DropZone.js"></script>
+<script type="text/javascript" src="../Source/DropZone/DropZone.HTML5.js"></script>
+<script type="text/javascript" src="../Source/DropZone/DropZone.HTML4.js"></script>
+<script type="text/javascript" src="../Source/DropZone/DropZone.Flash.js"></script>
+<script type="text/javascript">
+
+window.addEvent('domready', function() {
+  	
+	// Basic example using the best upload method (Autodetect the best method)
+	
+	var w = $('someWrap');
+	var btn = w.getElement('.button.upload');
+	var originalBtnText = btn.innerHTML;
+	
+	var myUpload = new DropZone({
+		ui_button: w.getElement('.button.upload'),
+		ui_drop_area: w.getElement('.button.upload'),
+		url: 'upload.php',
+		multiple: false,
+		//method: 'flash', // DEBUG ONLY
+		onUploadStart: function(){
+			
+			console.log('ON UPLOAD START!');
+			
+			btn.innerHTML = '...';
+						
+		},
+		onUploadProgress: function(perc){
+			
+			console.log('ON UPLOAD PROGRESS: ' + Math.floor(perc) + '%');
+
+			btn.innerHTML = Math.floor(perc) + '%';
+			
+		},
+		onUploadComplete: function(num_uploaded){
+			
+			console.log('ON UPLOAD COMPLETE!');
+			
+			btn.innerHTML = 'Uploaded!';
+			
+			(function(){
+				btn.innerHTML = originalBtnText;
+			}).delay(2000);
+
+		}
+	});
+	
+	
+});
+</script>
+
+</head>
+<body>
+<div class="wrap">
+	<p>
+		<a href="index.html">Multi + List + Drop</a> | 
+		<a href="single.html">Only button</a> |
+		<a href="droponly.html">Only Drag&Drop</a>
+	</p>
+	
+	
+	<div id="someWrap">
+		<div class="button upload">Upload!</div>
+	</div>
+</div>
+</body>
+</html>
