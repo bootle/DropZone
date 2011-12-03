@@ -29,21 +29,21 @@ window.addEvent('domready', function() {
 			
 			el.addClass('item_box').adopt(new Element('div', {'class': 'text filename', 'html': file.name}))
 			.adopt(new Element('div', {'class': 'text type', 'html': file.type}))
-			.adopt(new Element('div', {'class': 'progress'}))
+			.adopt(new Element('div', {'class': 'progress'}).set('tween', {duration: 200}))
 			.adopt(new Element('div', {'class': 'delete', 'html': 'x'}).addEvent('click', function(e){e.stop(); myUpload.cancel(file.fileindex, el)}));
 
 			el.setStyle('opacity', .3);
-						
+			
+			// remember file type can't be collected for some files,
+			// extensions are used then
+			
 			if(!file.type) return;
 			
 			if(file.type.match('image') && imagedata){
 			
 				el.addClass('image');
 				new Element('img', {'src': imagedata}).inject(el, 'top');
-			
-			// remember file type can't be collected for some files,
-			// extensions are used then
-			
+				
 			} else if (file.type.match('audio') || file.type.match('flac')){
 				
 				el.addClass('audio');
@@ -59,7 +59,7 @@ window.addEvent('domready', function() {
 			
 			console.log(Math.round(160 * perc/100));
 			
-			el.getElement('.progress').setStyle('width', Math.round(140 * perc/100));
+			el.getElement('.progress').tween('width', Math.round(140 * perc/100));
 			el.getElement('.progress').innerHTML = Math.floor(perc) + '%';
 						
 		},
@@ -68,7 +68,7 @@ window.addEvent('domready', function() {
 			console.log('ITEM COMPLETE');
 			
 			var perc = 100;
-			el.getElement('.progress').tween('width', 140 * perc/100);
+			el.getElement('.progress').tween('width', Math.round(140 * perc/100));
 			el.getElement('.progress').innerHTML = Math.floor(perc) + '%';
 			
 			//el.getElement('.progress').destroy();
@@ -88,7 +88,7 @@ window.addEvent('domready', function() {
 		},
 		onUploadProgress: function(perc){
 			
-			w.getElement('.progress_bar').setStyle('width', 540 * perc/100);
+			w.getElement('.progress_bar').tween('width', 540 * perc/100);
 			w.getElement('.progress_bar').innerHTML = Math.floor(perc) + '%';
 			
 		},
@@ -97,7 +97,7 @@ window.addEvent('domready', function() {
 			console.log('ON QUEUE COMPLETE! (' + num_uploaded + ' uploaded)');
 			
 			if(num_uploaded > 0){
-				w.getElement('.progress_bar').setStyle('width', 540);
+				w.getElement('.progress_bar').tween('width', 540);
 				w.getElement('.progress_bar').innerHTML = 'Job done!';
 			} else {
 				w.getElement('.progress_bar').setStyle('width', 0);
