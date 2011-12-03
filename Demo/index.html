@@ -63,7 +63,7 @@ window.addEvent('domready', function() {
 			
 			console.log(Math.round(160 * perc/100));
 			
-			el.getElement('.progress').setStyle('width', Math.round(140 * perc/100));
+			el.getElement('.progress').tween('width', Math.round(140 * perc/100)).set('tween', {duration: 200});
 			el.getElement('.progress').innerHTML = Math.floor(perc) + '%';
 						
 		},
@@ -92,7 +92,7 @@ window.addEvent('domready', function() {
 		},
 		onUploadProgress: function(perc){
 			
-			w.getElement('.progress_bar').setStyle('width', 540 * perc/100);
+			w.getElement('.progress_bar').tween('width', 540 * perc/100);
 			w.getElement('.progress_bar').innerHTML = Math.floor(perc) + '%';
 			
 		},
