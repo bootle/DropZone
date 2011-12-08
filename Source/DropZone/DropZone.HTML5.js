@@ -62,8 +62,10 @@ DropZone.HTML5 = new Class({
 				'dragleave': function (e) {
 					
 					e.stop();
-					var target = e.target;
-					if (target && target === this.uiDropArea) {
+					
+					console.log(e.target);
+					
+					if (e.target && e.target === this.uiDropArea) {
 						this.uiDropArea.removeClass('dropzone_over');
 					}
 					
@@ -72,6 +74,7 @@ DropZone.HTML5 = new Class({
 				'dragover': function (e) {
 				
 					e.stop();
+					e.preventDefault();
 					
 				}.bind(this),
 				
@@ -90,6 +93,38 @@ DropZone.HTML5 = new Class({
 				}.bind(this)
 				
 			});
+			
+			// prevent defaults on window
+			
+			// --> ADD REMOVING THESE ON KILL
+			
+			/*$(document.body).addEvents({
+							
+				'dragenter': function (e) {
+					
+					e.stop();
+					
+				}.bind(this),
+				
+				'dragleave': function (e) {
+					
+					e.stop();
+					
+				}.bind(this),
+				
+				'dragover': function (e) {
+				
+					e.stop();
+					
+				}.bind(this),
+				
+				'drop': function (e) {
+				
+					e.stop();
+					
+				}.bind(this)
+				
+			});*/
 		}
 		
 		
@@ -135,22 +170,21 @@ DropZone.HTML5 = new Class({
 		// Get slice method
 		
 		if (file.file.mozSlice) // Mozilla based
-			chunk = file.file.mozSlice(start, total)
+			chunk = file.file.mozSlice(start, total);
 		else if (file.file.webkitSlice) // Chrome, Safari, Konqueror and webkit based
 			chunk = file.file.webkitSlice(start, total);
-		else // Opera and other standards browsers
-			chunk = file.file.slice(start, total)
+		else if (file.file.slice) // Opera and other standards browsers
+			chunk = file.file.slice(start, total);
+		else 
+			chunk = file.file;
 		
 		// Set headers
 		
 		var headers = {
 			'Cache-Control': 'no-cache'
 		}
-		//headers = Object.merge(this.options.vars, headers);
 		
 		// Add call-specific vars
-		
-		
 		
 		var url = this.url + '&' + Object.toQueryString({
 			'X-Requested-With': 'XMLHttpRequest',
@@ -166,14 +200,21 @@ DropZone.HTML5 = new Class({
 			url: url,
 			headers: headers,
 			onSuccess: function (response) {
-			
-				response = JSON.decode(response);
+				
+				try {
+					response = JSON.decode(response, true);
+				} catch(e){
+					response = '';
+				}
 				
 				var item;
 				if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + (file.id));
 				
 				if (this._checkResponse(response)) {
-
+					
+					//if(response.finish == true) alert('FINISH returned correctly!');
+					
+					//if (!response.finish) {
 					if (total < file.size) {
 						
 						// in progress..
@@ -223,9 +264,9 @@ DropZone.HTML5 = new Class({
 
 	},
 
-	cancel: function (id) {
+	cancel: function (id, item) {
 		
-		this.parent();
+		this.parent(id, item);
 		
 		//
 		

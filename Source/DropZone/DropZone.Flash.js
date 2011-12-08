@@ -229,9 +229,9 @@ DropZone.Flash = new Class({
 		return hash;
 	},
 
-	cancel: function (id) {
+	cancel: function (id, item) {
 		
-		this.parent();
+		this.parent(id, item);
 		
 		this.fileList[id].checked = false;
 		Swiff.remote(this.flashObj.toElement(), 'xFileRemove', id + 1);

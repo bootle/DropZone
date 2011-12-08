@@ -30,7 +30,7 @@ window.addEvent('domready', function() {
 			el.addClass('item_box').adopt(new Element('div', {'class': 'text filename', 'html': file.name}))
 			.adopt(new Element('div', {'class': 'text type', 'html': file.type}))
 			.adopt(new Element('div', {'class': 'progress'}).set('tween', {duration: 200}))
-			.adopt(new Element('div', {'class': 'delete', 'html': 'x'}).addEvent('click', function(e){e.stop(); myUpload.cancel(file.fileindex, el)}));
+			.adopt(new Element('div', {'class': 'delete', 'html': 'x'}).addEvent('click', function(e){e.stop(); myUpload.cancel(file.id, el)}));
 
 			el.setStyle('opacity', .3);
 			

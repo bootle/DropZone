@@ -97,12 +97,6 @@ var DropZone = new Class({
 	// Vars
 	
 	method: null,
-	fileList: new Array(),
-	lastInput: undefined, // stores new, currently unused hidden input field
-	nCurrentUploads: 0,
-	nUploaded: 0,
-	queuePercent: 0,
-	isUploading: true,
 	flashObj: null,
 	flashloaded: false,
 	uiButton: null,
@@ -115,7 +109,7 @@ var DropZone = new Class({
 	// Init
 
 	initialize: function (options) {
-
+		
 		/*
 		* Check what's available
 		* and initiate based on that
@@ -126,7 +120,7 @@ var DropZone = new Class({
 		
 		// Check HTML5 support & if module is available
 		
-		if (!this.method && window.File && window.FileList && window.FileReader && window.Blob && typeof DropZone['HTML5'] != 'undefined') {
+		if (!this.method && window.File && window.FileList && window.Blob && typeof DropZone['HTML5'] != 'undefined') { //  && window.FileReader
 			
 			this.method = 'HTML5';
 
@@ -157,6 +151,8 @@ var DropZone = new Class({
 	
 	activate: function(){
 		
+		this._reset();
+		
 		// Add vars to URL (query string)
 		
 		this.url = this.options.url + ((!this.options.url.match('\\?')) ? '?' : '&') + Object.toQueryString(this.options.vars)
@@ -168,11 +164,11 @@ var DropZone = new Class({
 		this.uiDropArea = $(this.options.ui_drop_area);
 		
 		// just any of elements, to keep injected invisible elements next to
-		var omphallus = this.uiButton || this.uiList || this.uiDropArea;
-		if(!omphallus) return;
+		this.omphallus = this.uiButton || this.uiList || this.uiDropArea;
+		if(!this.omphallus) return;
 		
 		// container for invisible things
-		this.hiddenContainer = new Element('div', {'class': 'dropzone_hidden_wrap'}).inject(omphallus, 'after');
+		this.hiddenContainer = new Element('div', {'class': 'dropzone_hidden_wrap'}).inject(this.omphallus, 'after');
 		
 		this._newInput();
 		
@@ -251,11 +247,15 @@ var DropZone = new Class({
 	
 	cancel: function(id, item) {
 		
+		console.log('CANCEL ITEM: ' + id);
+		
 		if(!this.fileList[id]) return;
 		
 		this.fileList[id].checked = false;
 		
 		this.nCurrentUploads--;
+		
+		console.log('this.nCurrentUploads: ' + this.nCurrentUploads);
 		
 		if(this.nCurrentUploads == 0) this._queueComplete();
 		
@@ -263,7 +263,13 @@ var DropZone = new Class({
 
 	},
 	
-
+	// kill at will
+	
+	kill: function(){
+		
+		// 
+		
+	},
 	
 	
 	
@@ -381,7 +387,7 @@ var DropZone = new Class({
 		
 		this.queuePercent = perc / n_checked;
 		
-		this.fireEvent('onUploadProgress', [this.queuePercent]);
+		this.fireEvent('onUploadProgress', [this.queuePercent, this.nUploaded, this.fileList.length]);
 		
 	},
 	
@@ -389,19 +395,25 @@ var DropZone = new Class({
 		
 		this.fireEvent('uploadComplete', [this.nUploaded]);
 		
+		this._reset();
+		
 	},
 
 	_itemComplete: function(item, file, response){
 		
 		this.nCurrentUploads--;
 		this.nUploaded++;
-		
+				
 		this.fileList[file.id].uploaded = true;
-
+		this.fileList[file.id].progress = 100;
+		
+		this._updateQueueProgress();
+		
 		this.fireEvent('onItemComplete', [item, file, response]);
 		
-		console.log('N CURRENT: ' + this.nCurrentUploads);
-		console.log('N UPLOADED: ' + this.nUploaded);
+		console.log('ITEM COMPLETE');
+		console.log('this.nCurrentUploads: ' + this.nCurrentUploads);
+		console.log('this.nUploaded: ' + this.nUploaded);
 		
 		if(this.nCurrentUploads == 0) this._queueComplete();
 		
@@ -428,21 +440,36 @@ var DropZone = new Class({
 		
 		// check file type, and get thumb if it's an image
 		
-		if (typeof FileReader !== 'undefined' && file.type.match('image')) {
+		// Get the URL object (unavailable in Safari 5-)
+		window.URL = window.webkitURL || window.URL;
+		
+		if (file.type.match('image') && window.URL) { //typeof FileReader !== 'undefined' && 
 				
+			/*
+			
+			// this crashes Chrome with large images
+			
 			reader = new FileReader();
 			reader.onload = function (e) {
-				this.fireEvent('itemAdded', [item, file, e.target.result]);
+				this.fireEvent('itemAdded', [item, file, e.target.result]); // e.target.result for large images crashes Chrome?
 			}.bind(this);
 			
-			/*reader.onload = (function (theImg) {
-				
-				/*return function (evt) {
-					theImg.src = evt.target.result;
-				};*
-			}(img));*/
-			
 			reader.readAsDataURL(file.file);
+			*/
+			
+			// this approach works fine in Chrome
+			
+			
+			
+			var img = new Element('img', {'style': 'display: none'});
+			img.addEvent('load', function(e) {
+				this.fireEvent('itemAdded', [item, file, img.src]); // e.target.result for large images crashes Chrome?
+				window.URL.revokeObjectURL(img.src); // Clean up after yourself.
+			}.bind(this));
+			img.src = window.URL.createObjectURL(file.file);
+			
+			// add the invisible picture to load
+			this.omphallus.adopt(img);
 			
 		} else {
 			
@@ -469,9 +496,23 @@ var DropZone = new Class({
 		return filename.split('.').pop();
 	},
 	
+	_reset: function(){
+		
+		this.fileList = new Array();
+		this.lastInput = undefined; // stores new, currently unused hidden input field
+		this.nCurrentUploads = 0;
+		this.nUploaded = 0;
+		this.queuePercent = 0;
+		this.isUploading = true;
+		
+		if(this.hiddenContainer) this.hiddenContainer.empty();
+		
+	},
+	
 	// Change handling response to what you use in backend here..
 	
 	_checkResponse: function(response){
+		//return (response.error == 0);
 		return (response.error == 0);
 	}
 

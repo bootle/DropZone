@@ -58,7 +58,7 @@ DropZone.HTML4 = new Class({
 
 				this.upload();
 
-				response = JSON.decode(response);
+				response = JSON.decode(response, true);
 				
 				var file = this.fileList[response.key];
 				
@@ -122,9 +122,9 @@ DropZone.HTML4 = new Class({
 		return pieces[pieces.length - 1];
 	},
 
-	cancel: function (id) {
+	cancel: function (id, item) {
 		
-		this.parent();
+		this.parent(id, item);
 		
 		//
 		
