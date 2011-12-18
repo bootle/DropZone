@@ -1,7 +1,7 @@
 DropZone
 =========
 
-A crossbrowser uploader based on Mootools.
+A modular crossbrowser uploader class for Mootools.
 Based on MooUpload by Juan Lago,
 also inspired by Swiff.Uploader, Form.Upload & jQuery Aquantum
 
