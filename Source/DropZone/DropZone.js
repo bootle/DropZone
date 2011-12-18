@@ -235,8 +235,11 @@ var DropZone = new Class({
 		
 		this.fileList[id].checked = false;
 		
-		this.nCurrentUploads--;
-		if(this.fileList[id].error) this.nErrors--;
+		if(this.fileList[id].error) {
+			this.nErrors--;
+		} else {
+			this.nCurrentUploads--;
+		}
 		
 		if(this.nCurrentUploads <= 0) this._queueComplete();
 		
@@ -409,7 +412,7 @@ var DropZone = new Class({
 		this.nCurrentUploads--;
 		this.nErrors++;
 		
-		if(file.id){
+		if(typeof file.id != 'undefined'){
 			this.fileList[file.id].uploaded = true;
 			this.fileList[file.id].error = true;
 		}
@@ -508,7 +511,6 @@ var DropZone = new Class({
 	// Change handling response to what you use in backend here..
 	
 	_checkResponse: function(response){
-		//return (response.error == 0);
 		return (response.error == 0);
 	}
 
