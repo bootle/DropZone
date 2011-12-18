@@ -28,10 +28,11 @@ Request.Blob = new Class({
 
 	Extends: Request,
 
-	options: {		
+	options: {
 		urlEncoded: false,
 		noCache: true,
-		emulation: false
+		emulation: false,
+		trackProgress: false // used only for non-blob uploads (in Safari)
 	},
 	
 	send: function (blob, options) {
@@ -52,12 +53,13 @@ Request.Blob = new Class({
 		if (this.options.noCache) url += (url.contains('?') ? '&' : '?') + String.uniqueID();
 
 		var xhr = this.xhr;
-
+		
 		if (progressSupport) {
 			xhr.onloadstart = this.loadstart.bind(this);
 			xhr.onprogress = this.progress.bind(this);
+			xhr.upload.onprogress = this.progress.bind(this);
 		}
-
+		
 		xhr.open(method.toUpperCase(), url, this.options.async, this.options.user, this.options.password);
 		if (this.options.user && 'withCredentials' in xhr) xhr.withCredentials = true;
 

@@ -6,19 +6,7 @@ name: DropZone
 description: Crossbrowser file uploader with HTML5 chunk upload support, flexible UI and nice modability. 
 Uploads are based on Mooupload by Juan Lago
 
-changes:
-
-- modal architecture
-- all visible HTML is external for very flexible UI
-- the class adapts to use elements of UI provided, even if not all
-- image data collection for instant thumbnail output (HTML5 only)
-- drag and drop uploads (HTML5 only)
-- HTML4 uploads fixed
-- additional vars are added and passed as a query string
-- less options
-- general cleanup
-
-version: 0.1 (alpha!)
+version: 0.2 (beta!)
 
 license: MIT-style license
 
@@ -71,11 +59,11 @@ var DropZone = new Class({
 		flash: {
 			movie: 'Moo.Uploader.swf'
 		},
-		
+		gravity_center: null, // an element after which hidden DropZone elements are output
 		// Events
 		
 		/*
-		onInit: function (method) {},
+		onReset: function (method) {},
 		
 		onSelectError: function (error, filename, filesize) {},
 		
@@ -151,8 +139,6 @@ var DropZone = new Class({
 	
 	activate: function(){
 		
-		this._reset();
-		
 		// Add vars to URL (query string)
 		
 		this.url = this.options.url + ((!this.options.url.match('\\?')) ? '?' : '&') + Object.toQueryString(this.options.vars)
@@ -164,15 +150,15 @@ var DropZone = new Class({
 		this.uiDropArea = $(this.options.ui_drop_area);
 		
 		// just any of elements, to keep injected invisible elements next to
-		this.omphallus = this.uiButton || this.uiList || this.uiDropArea;
-		if(!this.omphallus) return;
+		this.gravityCenter = this.options.gravity_center;
+		if(!this.gravityCenter) this.gravityCenter = this.uiButton || this.uiList || this.uiDropArea;
+		if(!this.gravityCenter) return;
 		
 		// container for invisible things
-		this.hiddenContainer = new Element('div', {'class': 'dropzone_hidden_wrap'}).inject(this.omphallus, 'after');
+		this.hiddenContainer = new Element('div', {'class': 'dropzone_hidden_wrap'}).inject(this.gravityCenter, 'after');
 		
-		this._newInput();
-		
-		this.fireEvent('init', [this.method]);
+		// setup things fresh
+		this.reset();
 		
 	},
 	
@@ -227,8 +213,6 @@ var DropZone = new Class({
 		// fire!
 		this.fireEvent('onAddFiles');
 
-		this._newInput();
-
 		if (this.options.autostart) this.upload();
 
 	},
@@ -247,17 +231,14 @@ var DropZone = new Class({
 	
 	cancel: function(id, item) {
 		
-		console.log('CANCEL ITEM: ' + id);
-		
 		if(!this.fileList[id]) return;
 		
 		this.fileList[id].checked = false;
 		
 		this.nCurrentUploads--;
+		if(this.fileList[id].error) this.nErrors--;
 		
-		console.log('this.nCurrentUploads: ' + this.nCurrentUploads);
-		
-		if(this.nCurrentUploads == 0) this._queueComplete();
+		if(this.nCurrentUploads <= 0) this._queueComplete();
 		
 		this.fireEvent('onItemCancel', [item]);
 
@@ -287,9 +268,9 @@ var DropZone = new Class({
 		
 		this.uiButton.addEvent('click', function (e) {
 			e.stop();
-
+			
 			// Click trigger for input[type=file] only works in FF 4.x, IE and Chrome
-			this.lastInput.click();
+			if(this.options.multiple || (!this.options.multiple && !this.isUploading)) this.lastInput.click();
 
 		}.bind(this));
 		
@@ -300,7 +281,6 @@ var DropZone = new Class({
 	_newInput: function (formcontainer) {
 		
 		// Hide old input
-		// --> THIS CAN BE SIMPLER !
 		
 		/*var inputsnum = this._countInputs();
 		if (inputsnum > 0) {
@@ -387,15 +367,24 @@ var DropZone = new Class({
 		
 		this.queuePercent = perc / n_checked;
 		
-		this.fireEvent('onUploadProgress', [this.queuePercent, this.nUploaded, this.fileList.length]);
+		this.fireEvent('onUploadProgress', [this.queuePercent, this.nUploaded + this.nCurrentUploads, this.fileList.length]);
 		
 	},
 	
 	_queueComplete: function(){
 		
-		this.fireEvent('uploadComplete', [this.nUploaded]);
+		this.fireEvent('uploadComplete', [this.nUploaded, this.nErrors]);
 		
-		this._reset();
+		if(this.nErrors==0) this.reset();
+		
+	},
+	
+	
+	_itemProgress: function(item, perc){
+		
+		this.fireEvent('itemProgress', [item, perc]);
+		
+		this._updateQueueProgress();
 		
 	},
 
@@ -411,21 +400,23 @@ var DropZone = new Class({
 		
 		this.fireEvent('onItemComplete', [item, file, response]);
 		
-		console.log('ITEM COMPLETE');
-		console.log('this.nCurrentUploads: ' + this.nCurrentUploads);
-		console.log('this.nUploaded: ' + this.nUploaded);
-		
-		if(this.nCurrentUploads == 0) this._queueComplete();
+		if(this.nCurrentUploads <= 0) this._queueComplete();
 		
 	},
 
 	_itemError: function(item, file, response){
 		
 		this.nCurrentUploads--;
+		this.nErrors++;
 		
-		this.fileList[file.id].uploaded = true;
-
+		if(file.id){
+			this.fileList[file.id].uploaded = true;
+			this.fileList[file.id].error = true;
+		}
+		
 		this.fireEvent('onItemError', [item, file, response]);
+		
+		if(this.nCurrentUploads <= 0) this._queueComplete();
 		
 	},	
 	
@@ -469,7 +460,7 @@ var DropZone = new Class({
 			img.src = window.URL.createObjectURL(file.file);
 			
 			// add the invisible picture to load
-			this.omphallus.adopt(img);
+			this.gravityCenter.adopt(img);
 			
 		} else {
 			
@@ -496,16 +487,21 @@ var DropZone = new Class({
 		return filename.split('.').pop();
 	},
 	
-	_reset: function(){
+	reset: function(){
 		
 		this.fileList = new Array();
 		this.lastInput = undefined; // stores new, currently unused hidden input field
 		this.nCurrentUploads = 0;
 		this.nUploaded = 0;
+		this.nErrors = 0;
 		this.queuePercent = 0;
-		this.isUploading = true;
+		this.isUploading = false;
 		
 		if(this.hiddenContainer) this.hiddenContainer.empty();
+		
+		this._newInput();
+		
+		this.fireEvent('reset', [this.method]);
 		
 	},
 	

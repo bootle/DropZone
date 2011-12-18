@@ -23,12 +23,13 @@ window.addEvent('domready', function() {
 	
 	var myUpload = new DropZone({
 		
+		//method: 'HTML4', // DEBUG ONLY // HTML4 HTML5 Flash
+		
 		ui_button: w.getElement('.button.upload'),
 		ui_list: w.getElement('.list'),
 		ui_drop_area: $(document.body), //w.getElement('.drop_area')
 		url: 'upload.php',
-		//method: 'Flash', // DEBUG ONLY // HTML4 HTML5 Flash
-		
+				
 		onItemAdded: function(el, file, imagedata){
 			
 			el.addClass('item_box').adopt(new Element('div', {'class': 'text filename', 'html': file.name}))

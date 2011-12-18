@@ -63,8 +63,6 @@ DropZone.HTML5 = new Class({
 					
 					e.stop();
 					
-					console.log(e.target);
-					
 					if (e.target && e.target === this.uiDropArea) {
 						this.uiDropArea.removeClass('dropzone_over');
 					}
@@ -159,9 +157,13 @@ DropZone.HTML5 = new Class({
 	},
 
 	_html5Send: function (file, start, resume) {
-
+		
+		var item;
+		if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + (file.id));
+		
 		var end = this.options.block_size,
-			chunk;
+			chunk,
+			is_blob = true;
 
 		var total = start + end;
 		if (total > file.size) end = total - file.size;
@@ -171,12 +173,18 @@ DropZone.HTML5 = new Class({
 		
 		if (file.file.mozSlice) // Mozilla based
 			chunk = file.file.mozSlice(start, total);
-		else if (file.file.webkitSlice) // Chrome, Safari, Konqueror and webkit based
+		else if (file.file.webkitSlice) // Chrome and webkit based (but not yet Safari)
 			chunk = file.file.webkitSlice(start, total);
 		else if (file.file.slice) // Opera and other standards browsers
 			chunk = file.file.slice(start, total);
-		else 
-			chunk = file.file;
+		else { // Safari
+		
+			// send as form data instead of Blob
+			chunk = new FormData();
+			chunk.append('file', file.file);
+			is_blob = false;
+			
+		}
 		
 		// Set headers
 		
@@ -199,6 +207,17 @@ DropZone.HTML5 = new Class({
 		var xhr = new Request.Blob({
 			url: url,
 			headers: headers,
+			onProgress: function(e){
+				if(!is_blob){
+					
+					// track xhr progress only if data isn't actually sent as a chunk (eg. in Safari)
+					
+					var perc = e.loaded / e.total * 100;
+					this.fileList[file.id].progress = perc;
+					this._itemProgress(item, perc);
+					
+				}
+			}.bind(this),
 			onSuccess: function (response) {
 				
 				try {
@@ -207,15 +226,17 @@ DropZone.HTML5 = new Class({
 					response = '';
 				}
 				
-				var item;
-				if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + (file.id));
-				
 				if (this._checkResponse(response)) {
 					
-					//if(response.finish == true) alert('FINISH returned correctly!');
-					
-					//if (!response.finish) {
-					if (total < file.size) {
+					if (response.finish == true || total >= file.size) {
+						
+						// job done!
+						
+						this._itemComplete(item, file, response);
+
+						if (this.nCurrentUploads != 0 && this.nCurrentUploads <= this.options.max_queue && file.checked) this.upload();
+
+					} else {
 						
 						// in progress..
 						
@@ -226,21 +247,12 @@ DropZone.HTML5 = new Class({
 							// used to calculate global progress
 							this.fileList[file.id].progress = perc;
 							
-							this.fireEvent('itemProgress', [item, perc]);
+							this._itemProgress(item, perc);
 							
-							this._updateQueueProgress();
+							this._html5Send(file, start + response.size.toInt(), true) // Recursive upload
 							
-							this._html5Send(file, start + response.size.toInt(), file.id, true) // Recursive upload
 						}
 						
-					} else {
-						
-						// job done!
-						
-						this._itemComplete(item, file, response);
-
-						if (this.nCurrentUploads != 0 && this.nCurrentUploads <= this.options.max_queue && file.checked) this.upload();
-
 					}
 					
 				} else {

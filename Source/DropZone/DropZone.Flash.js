@@ -35,7 +35,13 @@ DropZone.Flash = new Class({
 	activate: function () {
 		
 		this.parent();
-				
+		
+	},
+	
+	reset: function(){
+		
+		this.parent();
+		
 		// Translate file type filter
 		var filters = this._flashFilter(this.options.accept);
 
@@ -54,8 +60,8 @@ DropZone.Flash = new Class({
 		}).inject(this.hiddenContainer);
 
 		// Prevent IE cache bug
-		if (Browser.ie) this.options.flash.movie += (this.options.flash.movie.contains('?') ? '&' : '?') + 'dropzone_movie=' + Date.now();
-
+		if (Browser.ie) this.options.flash.movie += (this.options.flash.movie.contains('?') ? '&' : '?') + 'dropzone_anti_cache=' + Date.now();
+		
 		// Deploy flash movie
 		this.flashObj = new Swiff(this.options.flash.movie, {
 			container: flashcontainer.get('id'),
@@ -81,12 +87,22 @@ DropZone.Flash = new Class({
 						data: this._cookieData(),
 						verbose: true
 					});
-
+					
 					this.isFlashLoaded = true;
 
 				}.bind(this),
-
-				select: function (files) {
+				
+				buttonEnter: function(){
+					this.uiButton.addClass('hover');
+					this.uiButton.fireEvent('mouseenter');
+				}.bind(this),
+				
+				buttonLeave: function(){
+					this.uiButton.removeClass('hover');
+					this.uiButton.fireEvent('mouseleave');
+				}.bind(this),
+				
+				select: function (files){
 					
 					this.addFiles(files[0]);
 					
@@ -118,9 +134,7 @@ DropZone.Flash = new Class({
 					if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + file.id);
 					this.fileList[file.id].progress = perc;
 					
-					this.fireEvent('itemProgress', [item, perc]);
-					
-					this._updateQueueProgress();
+					this._itemProgress(item, perc);
 					
 				}.bind(this),
 
@@ -138,7 +152,11 @@ DropZone.Flash = new Class({
 					
 					// get response right
 					
-					var response = JSON.decode(file.response.text);
+					try {
+						response = JSON.decode(file.response.text, true);
+					} catch(e){
+						response = '';
+					}
 					
 					if (this._checkResponse(response)) {
 						
@@ -154,7 +172,7 @@ DropZone.Flash = new Class({
 
 			}
 		});
-
+		
 		// toElement() method doesn't work in IE
 		/*
 		var flashElement = this.flashObj.toElement();
@@ -166,7 +184,7 @@ DropZone.Flash = new Class({
 		  return false;
 		}
 		*/
-
+		
 	},
 
 	upload: function () {
@@ -174,13 +192,17 @@ DropZone.Flash = new Class({
 		this.parent();
 		
 		if (!this.isUploading) {
-
+			
 			this.isUploading = true;
-
+			
 			for (var i = 0, f; f = this.fileList[i]; i++) {
 				if (!f.uploading) {
-					Swiff.remote(this.flashObj.toElement(), 'xFileStart', i + 1);
-					this.fileList[i].uploading = true;
+					
+					// delay to fix problem in IE8
+					(function(){
+						Swiff.remote(this.flashObj.toElement(), 'xFileStart', i);
+					}).delay(10, this);
+				
 				}
 			}
 
@@ -232,8 +254,6 @@ DropZone.Flash = new Class({
 	cancel: function (id, item) {
 		
 		this.parent(id, item);
-		
-		this.fileList[id].checked = false;
 		Swiff.remote(this.flashObj.toElement(), 'xFileRemove', id + 1);
 		
 	}

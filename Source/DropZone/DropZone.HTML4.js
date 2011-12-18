@@ -49,20 +49,28 @@ DropZone.HTML4 = new Class({
 		
 		this.iframe.addEvent('load', function () {
 
+			//var icdb = this.iframe.contentWindow.document.body;
 			var response = this.iframe.contentWindow.document.body.innerHTML;
-			
 			
 			if (response != '') {
 								
 				this.isUploading = false;
 
 				this.upload();
-
-				response = JSON.decode(response, true);
+				
+				try {
+					
+					// substring to avoid problems in Chrome, which adds a <pre> object to text
+					response = JSON.decode(response.substring(response.indexOf("{"), response.lastIndexOf("}") + 1), true);
+					
+				} catch(e){
+					//
+				}
 				
 				var file = this.fileList[response.key];
 				
-				if (this.uiList) var item = this.uiList.getElement('#dropzone_item_' + (response.key));
+				var item;
+				if (this.uiList && response) var item = this.uiList.getElement('#dropzone_item_' + (response.key));
 				
 				if (this._checkResponse(response)) {
 				
@@ -74,7 +82,7 @@ DropZone.HTML4 = new Class({
 					this._itemComplete(item, file, response);
 										
 				} else {
-
+					
 					this._itemError(item, file, response);
 					
 				}
@@ -104,6 +112,11 @@ DropZone.HTML4 = new Class({
 				if (file != undefined && !this.isUploading) {
 					if (file.checked && !file.uploading) {
 						file.uploading = true;
+						var perc = file.progress = 50;
+						
+						if (this.uiList) var item = this.uiList.getElement('#dropzone_item_' + id);
+						this._itemProgress(item, perc);
+						
 						this.isUploading = true;
 						this.nCurrentUploads++;
 						var submit = el.submit();

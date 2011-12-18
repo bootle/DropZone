@@ -52,9 +52,9 @@ package
 		public static function escapeArray(message_arr:Array):Array
 		{
 			var length:int = message_arr.length;
-			var ret:Array = new Array(length);			
+			var ret:Array = new Array(length);
 			
-			for (var i:int = 0; i < length; i++) {
+			for (var i = 0; i < length; i++) {
 				ret[i] = escape(message_arr[i]);
 			}
 			
