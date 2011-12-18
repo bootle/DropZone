@@ -3,7 +3,8 @@ DropZone
 
 A modular crossbrowser uploader class for Mootools.
 Based on MooUpload by Juan Lago,
-also inspired by Swiff.Uploader, Form.Upload & jQuery Aquantum
+also inspired by Swiff.Uploader, Form.Upload & jQuery Aquantum.
+
 
 Features
 --------
@@ -13,7 +14,7 @@ Features
 + HTML4 upload 
 + Automatic selection of available method 
 + Multiple file selection 
-+ Autostart upload option 
++ Autostart upload
 + Progress tracking 
 + Semi-Automatic file list control (to show progress for multiple 
 files, cancel etc.) 
@@ -25,7 +26,7 @@ HTML5)
 included for HTML5+HTML4 support) 
 + No visible HTML within the class, UI is very flexible and fully 
 independent 
-+ The class adapts to use elements of UI provided, even if not all 
++ The class adapts to use elements of UI provided (eg. only a button, or button with list, and/or drag & drop etc.)
 + Image data collection for instant thumbnail output (HTML5 only) 
 + Drag and drop uploads (HTML5 only) 
 + Additional vars can be added (eg. upload_to_project: 1) 
@@ -35,7 +36,7 @@ independent
 Screenshots
 -----------
 
-#![Screenshot 1](http://www.dropr.com)
+#![Screenshot 1](http://tinyurl.com/cr5lumj)
 
 
 Dependencies
