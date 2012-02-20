@@ -3,8 +3,7 @@
 
 name: DropZone
 
-description: Crossbrowser file uploader with HTML5 chunk upload support, flexible UI and nice modability. 
-Uploads are based on Mooupload by Juan Lago
+description: Crossbrowser file uploader with HTML5 chunk upload support, flexible UI and nice modability. Uploads are based on Mooupload by Juan Lago
 
 version: 0.9.1 (beta!)
 
