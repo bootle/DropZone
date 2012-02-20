@@ -159,7 +159,7 @@ DropZone.HTML5 = new Class({
 	_html5Send: function (file, start, resume) {
 		
 		var item;
-		if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + (file.id));
+		if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + (file.uniqueid));
 		
 		var end = this.options.block_size,
 			chunk,

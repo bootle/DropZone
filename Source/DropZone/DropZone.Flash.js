@@ -124,15 +124,15 @@ DropZone.Flash = new Class({
 
 				fileProgress: function (r) {
 					
-					var file = r[0];
-					
-					// flash returns vals starting with 1
-					file.id--;
-					
+					// get the right file object
+					var file = this.fileList[r[0].id-1];
+										
 					var item,
 						perc = file.progress.percentLoaded;
-					if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + file.id);
-					this.fileList[file.id].progress = perc;
+					if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + file.uniqueid);
+					
+					// set file progress
+					file.progress = perc;
 					
 					this._itemProgress(item, perc);
 					
@@ -140,23 +140,24 @@ DropZone.Flash = new Class({
 
 				fileComplete: function (r) {
 					
-					var file = r[0];
+					// get the right file object
+					var file = this.fileList[r[0].id-1];
 					
-					// flash returns vals starting with 1
-					file.id--;
-					
-					this.fileList[file.id].uploaded = true;
+					// set to uploaded
+					file.uploaded = true;
 					
 					var item;
-					if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + file.id);
-					
+					if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + file.uniqueid);
+										
 					// get response right
 					
 					try {
-						response = JSON.decode(file.response.text, true);
+						response = JSON.decode(r[0].response.text, true);
 					} catch(e){
 						response = '';
 					}
+					
+					// check if uploaded correctly
 					
 					if (this._checkResponse(response)) {
 						

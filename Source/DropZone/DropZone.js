@@ -6,7 +6,7 @@ name: DropZone
 description: Crossbrowser file uploader with HTML5 chunk upload support, flexible UI and nice modability. 
 Uploads are based on Mooupload by Juan Lago
 
-version: 0.9 (beta!)
+version: 0.9.1 (beta!)
 
 license: MIT-style license
 
@@ -429,7 +429,7 @@ var DropZone = new Class({
 		
 		var item = new Element('div', {
 			'class': 'dropzone_item',
-			'id': 'dropzone_item_' + file.id
+			'id': 'dropzone_item_' + file.uniqueid
 		}).inject(this.uiList);
 		
 		// check file type, and get thumb if it's an image
@@ -457,10 +457,12 @@ var DropZone = new Class({
 			
 			var img = new Element('img', {'style': 'display: none'});
 			img.addEvent('load', function(e) {
-				this.fireEvent('itemAdded', [item, file, img.src]); // e.target.result for large images crashes Chrome?
 				window.URL.revokeObjectURL(img.src); // Clean up after yourself.
 			}.bind(this));
 			img.src = window.URL.createObjectURL(file.file);
+			
+			// job done
+			this.fireEvent('itemAdded', [item, file, img.src]); // e.target.result for large images crashes Chrome?
 			
 			// add the invisible picture to load
 			this.gravityCenter.adopt(img);

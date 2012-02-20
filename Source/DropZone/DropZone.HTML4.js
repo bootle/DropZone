@@ -70,7 +70,7 @@ DropZone.HTML4 = new Class({
 				var file = this.fileList[response.key];
 				
 				var item;
-				if (this.uiList && response) var item = this.uiList.getElement('#dropzone_item_' + (response.key));
+				if (this.uiList && response) var item = this.uiList.getElement('#dropzone_item_' + this.fileList[response.key].uniqueid);
 				
 				if (this._checkResponse(response)) {
 				
@@ -114,7 +114,7 @@ DropZone.HTML4 = new Class({
 						file.uploading = true;
 						var perc = file.progress = 50;
 						
-						if (this.uiList) var item = this.uiList.getElement('#dropzone_item_' + id);
+						if (this.uiList) var item = this.uiList.getElement('#dropzone_item_' + this.fileList[id].uniqueid);
 						this._itemProgress(item, perc);
 						
 						this.isUploading = true;

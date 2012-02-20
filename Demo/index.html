@@ -23,7 +23,7 @@ window.addEvent('domready', function() {
 	
 	var myUpload = new DropZone({
 		
-		//method: 'HTML4', // DEBUG ONLY // HTML4 HTML5 Flash
+		//method: 'Flash', // DEBUG ONLY // HTML4 HTML5 Flash
 		
 		ui_button: w.getElement('.button.upload'),
 		ui_list: w.getElement('.list'),
@@ -32,6 +32,9 @@ window.addEvent('domready', function() {
 				
 		onItemAdded: function(el, file, imagedata){
 			
+			//console.log('ITEM ADDED: ');
+			//console.log(el);
+
 			el.addClass('item_box').adopt(new Element('div', {'class': 'text filename', 'html': file.name}))
 			.adopt(new Element('div', {'class': 'text type', 'html': file.type}))
 			.adopt(new Element('div', {'class': 'progress'}).set('tween', {duration: 200}))
@@ -78,6 +81,7 @@ window.addEvent('domready', function() {
 			
 			//el.getElement('.progress').destroy();
 			el.getElement('.delete').destroy();
+			
 			el.setStyle('opacity', 1);
 									
 		},
