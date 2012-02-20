@@ -36,8 +36,7 @@ independent
 Screenshots
 -----------
 
-#![Screenshot 1](http://files.droplr.com/files_production/acc_3220/cQry?AWSAccessKeyId=AKIAJSVQN3Z4K7MT5U2A&Expires=1324240058&Signature=6tpGApFeQnvUumW0fYe17Zl%2FSYI%3D&response-content-disposition=inline%3B+filename%3DScreenshot+2011-12-18+at+21.24.png)
-
+#![Screenshot 1](http://files.droplr.com/files_production/acc_3220/cQry?AWSAccessKeyId=AKIAJSVQN3Z4K7MT5U2A&Expires=1329777836&Signature=nFMYxN8qE6T9bfrgGeyQkUuhgIY%3D&response-content-disposition=inline%3B+filename%3D%22Screenshot+2011-12-18+at+21.24.png)
 http://d.pr/cQry
 
 Dependencies
