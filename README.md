@@ -36,7 +36,7 @@ independent
 Screenshots
 -----------
 
-#![Screenshot 1](http://files.droplr.com/files_production/acc_3220/cQry?AWSAccessKeyId=AKIAJSVQN3Z4K7MT5U2A&Expires=1329778125&Signature=Nf9yPiDhcppVktl0Ha78bZjsVuY%3D&response-content-disposition=inline%3B+filename%3D%22Screenshot+2011-12-18+at+21.24.png%22)
+#![Screenshot 1](http://thebootle.com/foof/moo/DropZone/Demo/Screenshot%202011-12-18%20at%2021.24.png)
 http://d.pr/cQry
 
 Dependencies
