@@ -94,35 +94,17 @@ DropZone.HTML5 = new Class({
 			
 			// prevent defaults on window
 			
-			// --> ADD REMOVING THESE ON KILL
+			this.bounds = {
+				stopEvent: this._stopEvent.bind(this)
+			}
+		
+			$(document.body).addEvents({
+				'dragenter': this.bounds.stopEvent,
+				'dragleave': this.bounds.stopEvent,
+				'dragover': this.bounds.stopEvent,
+				'drop': this.bounds.stopEvent
+			});
 			
-			/*$(document.body).addEvents({
-							
-				'dragenter': function (e) {
-					
-					e.stop();
-					
-				}.bind(this),
-				
-				'dragleave': function (e) {
-					
-					e.stop();
-					
-				}.bind(this),
-				
-				'dragover': function (e) {
-				
-					e.stop();
-					
-				}.bind(this),
-				
-				'drop': function (e) {
-				
-					e.stop();
-					
-				}.bind(this)
-				
-			});*/
 		}
 		
 		
@@ -134,20 +116,12 @@ DropZone.HTML5 = new Class({
 	
 	upload: function (){
 		
-		/*console.log('HTML5 upload:');
-		console.log('this.nCurrentUploads: ' + this.nCurrentUploads);
-		console.log('this.options.max_queue: ' + this.options.max_queue);*/
-		
 		this.fileList.each(function(file, i){
 	
 			if (this.nCurrentUploads < this.options.max_queue) {
 				
-				//console.log('HTML5 upload: X1 id: ' + i);
-				
 				// Upload only checked and new files
 				if (file.checked && !file.uploading){
-					
-					//console.log('HTML5 upload: X2 id: ' + i);
 					
 					this.isUploading = true;
 					file.uploading = true;
@@ -293,6 +267,21 @@ DropZone.HTML5 = new Class({
 		
 	},
 	
+	kill: function(){
+		
+		this.parent();
+		
+		// remove events
+		
+		$(document.body).removeEvents({
+			'dragenter': this.bounds.stopEvent,
+			'dragleave': this.bounds.stopEvent,
+			'dragover': this.bounds.stopEvent,
+			'drop': this.bounds.stopEvent
+		});
+		
+	},
+	
 	
 	/* Private methods */
 	
@@ -310,6 +299,10 @@ DropZone.HTML5 = new Class({
 
 		}.bind(this));
 		
+	},
+	
+	_stopEvent: function(e){
+		e.stop();
 	}
 
 });
