@@ -5,7 +5,7 @@ name: DropZone
 
 description: Crossbrowser file uploader with HTML5 chunk upload support, flexible UI and nice modability. Uploads are based on Mooupload by Juan Lago
 
-version: 0.9.1
+version: 0.9.2
 
 license: MIT-style license
 
@@ -93,7 +93,7 @@ var DropZone = new Class({
 	// Init
 
 	initialize: function (options) {
-		
+	
 		/*
 		* Check what's available
 		* and initiate based on that
@@ -225,14 +225,21 @@ var DropZone = new Class({
 	
 	cancel: function(id, item) {
 		
-		if(!this.fileList[id]) return;
+		/*console.log('DZ: Cancel:');
+		console.log(id);
+		console.log(item);
+		console.log(this.fileList[id]);*/
 		
-		this.fileList[id].checked = false;
+		if(this.fileList[id]){
+			
+			this.fileList[id].checked = false;
+			
+			if(this.fileList[id].error) {
+				this.nErrors--;
+			} else {
+				this.nCurrentUploads--;
+			}
 		
-		if(this.fileList[id].error) {
-			this.nErrors--;
-		} else {
-			this.nCurrentUploads--;
 		}
 		
 		this.nCancelled++;
@@ -378,6 +385,8 @@ var DropZone = new Class({
 	
 	_queueComplete: function(){
 		
+		//console.log('_queueComplete');
+		
 		this.fireEvent('uploadComplete', [this.nUploaded, this.nErrors]);
 		
 		if(this.nErrors==0) this.reset();
@@ -395,6 +404,11 @@ var DropZone = new Class({
 
 	_itemComplete: function(item, file, response){
 		
+		//console.log('_itemComplete');
+		/*console.log(item);
+		console.log(file);
+		console.log(this.fileList[file.id]);*/
+		
 		this.nCurrentUploads--;
 		this.nUploaded++;
 				
@@ -405,7 +419,7 @@ var DropZone = new Class({
 		
 		this.fireEvent('onItemComplete', [item, file, response]);
 		
-		if(this.nCurrentUploads <= 0) this._queueComplete();
+		if(this.nCurrentUploads <= 0 && this.nUploaded + this.nErrors + this.nCancelled == this.fileList.length) this._queueComplete();
 		
 	},
 
@@ -521,6 +535,5 @@ var DropZone = new Class({
 	_checkResponse: function(response){
 		return (response.error == 0);
 	}
-
 
 });

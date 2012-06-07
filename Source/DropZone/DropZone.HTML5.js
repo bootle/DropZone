@@ -132,29 +132,37 @@ DropZone.HTML5 = new Class({
 		
 	},
 	
-	upload: function () {
+	upload: function (){
 		
-		this.parent();
+		/*console.log('HTML5 upload:');
+		console.log('this.nCurrentUploads: ' + this.nCurrentUploads);
+		console.log('this.options.max_queue: ' + this.options.max_queue);*/
 		
 		this.fileList.each(function(file, i){
 	
-			if (this.nCurrentUploads <= this.options.max_queue) {
+			if (this.nCurrentUploads < this.options.max_queue) {
+				
+				//console.log('HTML5 upload: X1 id: ' + i);
 				
 				// Upload only checked and new files
-				if (file.checked && !file.uploading) {
-				
+				if (file.checked && !file.uploading){
+					
+					//console.log('HTML5 upload: X2 id: ' + i);
+					
 					this.isUploading = true;
 					file.uploading = true;
 					this.nCurrentUploads++;
 					
 					this._html5Send(file, 0, false);
 					
+					this.parent();
+					
 				}
 
 			}
 
 		}, this);
-		
+				
 	},
 
 	_html5Send: function (file, start, resume) {
@@ -235,7 +243,7 @@ DropZone.HTML5 = new Class({
 						
 						this._itemComplete(item, file, response);
 
-						if (this.nCurrentUploads != 0 && this.nCurrentUploads <= this.options.max_queue && file.checked) this.upload();
+						if (this.nCurrentUploads < this.options.max_queue && file.checked) this.upload(); //this.nCurrentUploads != 0 && 
 
 					} else {
 						
@@ -264,7 +272,7 @@ DropZone.HTML5 = new Class({
 					
 					if(this.nCurrentUploads == 0)
 						this._queueComplete();
-					else if (this.nCurrentUploads != 0 && this.nCurrentUploads <= this.options.max_queue) 
+					else if (this.nCurrentUploads < this.options.max_queue) //this.nCurrentUploads != 0 && 
 						this.upload();
 
 				}
