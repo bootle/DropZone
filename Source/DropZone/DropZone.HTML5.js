@@ -142,6 +142,7 @@ DropZone.HTML5 = new Class({
 				
 				// Upload only checked and new files
 				if (file.checked && !file.uploading) {
+				
 					this.isUploading = true;
 					file.uploading = true;
 					this.nCurrentUploads++;

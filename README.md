@@ -37,7 +37,6 @@ Screenshots
 -----------
 
 #![Screenshot 1](http://thebootle.com/foof/moo/DropZone/Demo/Screenshot%202011-12-18%20at%2021.24.png)
-http://d.pr/cQry
 
 Dependencies
 ------------

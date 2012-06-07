@@ -21,7 +21,15 @@ provides: [DropZone.Flash]
 DropZone.Flash = new Class({
 
 	Extends: DropZone,
-
+	
+	options: {
+		
+		flash: {
+			movie: 'Moo.Uploader.swf'
+		}
+		
+	},
+	
 	initialize: function (options) {
 		
 		this.setOptions(options);
@@ -33,6 +41,9 @@ DropZone.Flash = new Class({
 	},
 	
 	activate: function () {
+		
+		// set options
+		//this.setOptions(options);
 		
 		this.parent();
 		
@@ -126,9 +137,9 @@ DropZone.Flash = new Class({
 					
 					// get the right file object
 					var file = this.fileList[r[0].id-1];
-										
+									
 					var item,
-						perc = file.progress.percentLoaded;
+						perc = r[0].progress.percentLoaded;
 					if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + file.uniqueid);
 					
 					// set file progress

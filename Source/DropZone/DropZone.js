@@ -5,7 +5,7 @@ name: DropZone
 
 description: Crossbrowser file uploader with HTML5 chunk upload support, flexible UI and nice modability. Uploads are based on Mooupload by Juan Lago
 
-version: 0.9.1 (beta!)
+version: 0.9.1
 
 license: MIT-style license
 
@@ -54,9 +54,6 @@ var DropZone = new Class({
 		block_size: 101400, // Juan doesn't recommend less than 101400 and more than 502000
 		vars: { // additional to be sent to backend
 			'isDropZone': true // example..
-		},
-		flash: {
-			movie: 'Moo.Uploader.swf'
 		},
 		gravity_center: null, // an element after which hidden DropZone elements are output
 		// Events
@@ -129,8 +126,6 @@ var DropZone = new Class({
 			return new DropZone[this.method](options);
 			
 		} else {
-		
-			console.log('DropZone method is not available, please include the file: DropZone.' + this.method);
 			
 		}
 		
@@ -240,6 +235,8 @@ var DropZone = new Class({
 			this.nCurrentUploads--;
 		}
 		
+		this.nCancelled++;
+				
 		if(this.nCurrentUploads <= 0) this._queueComplete();
 		
 		this.fireEvent('onItemCancel', [item]);
@@ -250,7 +247,13 @@ var DropZone = new Class({
 	
 	kill: function(){
 		
-		// 
+		// cancel all
+		
+		this.fileList.each(function(f, i){
+			
+			this.cancel(f.id);
+						
+		}, this);
 		
 	},
 	
@@ -369,7 +372,7 @@ var DropZone = new Class({
 		
 		this.queuePercent = perc / n_checked;
 		
-		this.fireEvent('onUploadProgress', [this.queuePercent, this.nUploaded + this.nCurrentUploads, this.fileList.length]);
+		this.fireEvent('onUploadProgress', [this.queuePercent, this.nUploaded + this.nCurrentUploads, this.fileList.length-this.nCancelled]);
 		
 	},
 	
@@ -452,16 +455,19 @@ var DropZone = new Class({
 			
 			// this approach works fine in Chrome
 			
-			
-			
-			var img = new Element('img', {'style': 'display: none'});
+			var img = new Element('img'); //, {'style': 'display: none'}
 			img.addEvent('load', function(e) {
+				
+				// job done
+				this.fireEvent('itemAdded', [item, file, img.src, img.getSize()]); // e.target.result for large images crashes Chrome?
+				
 				window.URL.revokeObjectURL(img.src); // Clean up after yourself.
+				
+				img.destroy();
+				
 			}.bind(this));
-			img.src = window.URL.createObjectURL(file.file);
 			
-			// job done
-			this.fireEvent('itemAdded', [item, file, img.src]); // e.target.result for large images crashes Chrome?
+			img.src = window.URL.createObjectURL(file.file);
 			
 			// add the invisible picture to load
 			this.gravityCenter.adopt(img);
@@ -498,6 +504,7 @@ var DropZone = new Class({
 		this.nCurrentUploads = 0;
 		this.nUploaded = 0;
 		this.nErrors = 0;
+		this.nCancelled = 0;
 		this.queuePercent = 0;
 		this.isUploading = false;
 		
