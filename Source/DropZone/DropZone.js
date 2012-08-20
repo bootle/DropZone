@@ -165,11 +165,15 @@ var DropZone = new Class({
 	
 	addFiles: function (files) {
 		
+		//console.log('ADD FILES:');
+		
 		for (var i = 0, f; f = files[i]; i++) {
 
 			var fname = f.name || f.fileName;
 			var fsize = f.size || f.fileSize;
-
+			
+			//console.log(fname);
+			
 			if (fsize != undefined) {
 
 				if (fsize < this.options.min_file_size) {
@@ -215,8 +219,10 @@ var DropZone = new Class({
 	
 	upload: function () {
 		
-		this.isUploading = false;
-
+		this.isUploading = true;
+		
+		this._updateQueueProgress();
+		
 		this.fireEvent('onUploadStart');
 
 	},
@@ -236,7 +242,7 @@ var DropZone = new Class({
 			
 			if(this.fileList[id].error) {
 				this.nErrors--;
-			} else {
+			} else if(this.fileList[id].uploading) {
 				this.nCurrentUploads--;
 			}
 		
@@ -247,7 +253,11 @@ var DropZone = new Class({
 		if(this.nCurrentUploads <= 0) this._queueComplete();
 		
 		this.fireEvent('onItemCancel', [item]);
-
+		
+		// try to upload next
+		
+		this.upload();
+		
 	},
 	
 	// kill at will
@@ -363,7 +373,9 @@ var DropZone = new Class({
 
 	},
 
-	_updateQueueProgress: function () {
+	_updateQueueProgress: function (){
+		
+		//console.log('UPDATE QUEUE?');
 		
 		var perc = 0,
 			n_checked = 0;
@@ -375,9 +387,15 @@ var DropZone = new Class({
 			}
 		});
 		
+		//console.log('n_checked: ' + n_checked);
+		
 		if(n_checked == 0) return;
 		
 		this.queuePercent = perc / n_checked;
+		
+		/*console.log('UPDATE QUEUE!');
+		console.log(this.nUploaded + this.nCurrentUploads);
+		console.log(this.fileList.length-this.nCancelled);*/
 		
 		this.fireEvent('onUploadProgress', [this.queuePercent, this.nUploaded + this.nCurrentUploads, this.fileList.length-this.nCancelled]);
 		
@@ -404,10 +422,10 @@ var DropZone = new Class({
 
 	_itemComplete: function(item, file, response){
 		
-		//console.log('_itemComplete');
-		/*console.log(item);
+		/*console.log('_itemComplete');
+		console.log(item);
 		console.log(file);
-		console.log(this.fileList[file.id]);*/
+		console.log(this.fileList[file.id]);/**/
 		
 		this.nCurrentUploads--;
 		this.nUploaded++;
@@ -428,7 +446,7 @@ var DropZone = new Class({
 		this.nCurrentUploads--;
 		this.nErrors++;
 		
-		if(typeof file.id != 'undefined'){
+		if(typeof file.id != 'undefined' && typeof this.fileList[file.id] != 'undefined'){
 			this.fileList[file.id].uploaded = true;
 			this.fileList[file.id].error = true;
 		}
@@ -468,6 +486,7 @@ var DropZone = new Class({
 			*/
 			
 			// this approach works fine in Chrome
+			// but waiting for file to load breaks the queue order..
 			
 			var img = new Element('img'); //, {'style': 'display: none'}
 			img.addEvent('load', function(e) {

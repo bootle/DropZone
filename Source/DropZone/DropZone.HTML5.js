@@ -118,21 +118,21 @@ DropZone.HTML5 = new Class({
 		
 		this.fileList.each(function(file, i){
 	
-			if (this.nCurrentUploads < this.options.max_queue) {
-				
-				// Upload only checked and new files
-				if (file.checked && !file.uploading){
-					
-					this.isUploading = true;
-					file.uploading = true;
-					this.nCurrentUploads++;
-					
-					this._html5Send(file, 0, false);
-					
-					this.parent();
-					
-				}
+			if (file.checked && !file.uploading && this.nCurrentUploads < this.options.max_queue) {
+			// Upload only checked and new files
 
+				//this.isUploading = true;
+				file.uploading = true;
+				this.nCurrentUploads++;
+				
+				/*console.log(' ');
+				console.log('----------------------');
+				console.log('Starting upload: ' + i + ' file: ' + file.name);*/
+				
+				this._html5Send(file, 0, false);
+				
+				this.parent();
+		
 			}
 
 		}, this);
@@ -142,7 +142,10 @@ DropZone.HTML5 = new Class({
 	_html5Send: function (file, start, resume) {
 		
 		var item;
-		if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + (file.uniqueid));
+		//if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + (file.uniqueid));
+		// now getting the item globally in case it was moved somewhere else in onItemAdded event
+		// this way it can always remain controlled
+		item = $('dropzone_item_' + file.uniqueid);
 		
 		var end = this.options.block_size,
 			chunk,
@@ -203,15 +206,20 @@ DropZone.HTML5 = new Class({
 			}.bind(this),
 			onSuccess: function (response) {
 				
+				/*console.log('XHR success:');
+				console.log(file.id);
+				console.log(file);
+				console.log(this.fileList[file.id]);*/
+				
 				try {
 					response = JSON.decode(response, true);
 				} catch(e){
 					response = '';
 				}
 				
-				if (this._checkResponse(response)) {
+				if (this._checkResponse(response) && typeof this.fileList[file.id] != 'undefined') {
 					
-					if (response.finish == true || total >= file.size) {
+					if (response.finish == true) { // || total >= file.size // sometimes the size is measured wrong and fires too early?
 						
 						// job done!
 						
@@ -227,7 +235,7 @@ DropZone.HTML5 = new Class({
 							
 							var perc = (total / file.size) * 100;
 							
-							// used to calculate global progress
+							// it's used to calculate global progress
 							this.fileList[file.id].progress = perc;
 							
 							this._itemProgress(item, perc);
@@ -244,15 +252,14 @@ DropZone.HTML5 = new Class({
 					
 					this._itemError(item, file, response);
 					
-					if(this.nCurrentUploads == 0)
-						this._queueComplete();
-					else if (this.nCurrentUploads < this.options.max_queue) //this.nCurrentUploads != 0 && 
-						this.upload();
-
 				}
 
+			}.bind(this),
+			onFailure: function(){
+				
+				this._itemError(item, file);
+				
 			}.bind(this)
-			
 		});
 
 		xhr.send(chunk);
@@ -285,7 +292,7 @@ DropZone.HTML5 = new Class({
 	
 	/* Private methods */
 	
-	_newInput: function () {
+	_newInput: function (){
 		
 		this.parent();
 		
@@ -298,6 +305,17 @@ DropZone.HTML5 = new Class({
 			this.addFiles(this.lastInput.files);
 
 		}.bind(this));
+		
+	},
+	
+	_itemError: function(item, file, response){
+		
+		this.parent(item, file, response);
+				
+		if(this.nCurrentUploads == 0)
+			this._queueComplete();
+		else if (this.nCurrentUploads < this.options.max_queue) //this.nCurrentUploads != 0 && 
+			this.upload();
 		
 	},
 	
