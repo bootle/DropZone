@@ -1,9 +1,15 @@
-DropZone
-=========
+DropZone Uploader
+=================
 
-A modular crossbrowser uploader class for Mootools.
+A very flexible, modular and crossbrowser uploader class for Mootools.
 Based on MooUpload by Juan Lago,
 also inspired by Swiff.Uploader, Form.Upload & jQuery Aquantum.
+
+
+How to Use
+----------
+
+See demo: http://thebootle.com/foof/moo/DropZone/Demo/
 
 
 Features
@@ -44,9 +50,3 @@ Dependencies
 + Mootools 1.4.0
 	+ Elements.Event
 	+ Swiff
-
-
-How to Use
-----------
-
-See demo: http://thebootle.com/foof/moo/DropZone/Demo/
