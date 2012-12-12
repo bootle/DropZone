@@ -101,8 +101,6 @@ DropZone.HTML4 = new Class({
 	
 	upload: function () {
 		
-		this.parent();
-		
 		if (!this.isUploading) {
 
 			this._getForms().each(function (el, id) {
@@ -124,7 +122,9 @@ DropZone.HTML4 = new Class({
 				}
 
 			}.bind(this));
-
+			
+			this.parent();
+			
 		}
 		
 	},

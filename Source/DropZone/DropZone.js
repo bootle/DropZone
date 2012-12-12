@@ -51,9 +51,9 @@ var DropZone = new Class({
 		max_queue: 5,
 		min_file_size: 1,
 		max_file_size: 0,
-		block_size: 101400, // Juan doesn't recommend less than 101400 and more than 502000
+		block_size: 502000, // Juan doesn't recommend less than 101400 and more than 502000
 		vars: { // additional to be sent to backend
-			'isDropZone': true // example..
+			'is_drop_zone': true // example..
 		},
 		gravity_center: null, // an element after which hidden DropZone elements are output
 		// Events
@@ -165,14 +165,10 @@ var DropZone = new Class({
 	
 	addFiles: function (files) {
 		
-		//console.log('ADD FILES:');
-		
 		for (var i = 0, f; f = files[i]; i++) {
 
 			var fname = f.name || f.fileName;
 			var fsize = f.size || f.fileSize;
-			
-			//console.log(fname);
 			
 			if (fsize != undefined) {
 
@@ -209,7 +205,7 @@ var DropZone = new Class({
 		}
 
 		// fire!
-		this.fireEvent('onAddFiles');
+		this.fireEvent('onAddFiles', [this.fileList.length]);
 
 		if (this.options.autostart) this.upload();
 
@@ -230,11 +226,6 @@ var DropZone = new Class({
 	// cancels a specified item
 	
 	cancel: function(id, item) {
-		
-		/*console.log('DZ: Cancel:');
-		console.log(id);
-		console.log(item);
-		console.log(this.fileList[id]);*/
 		
 		if(this.fileList[id]){
 			
@@ -375,8 +366,6 @@ var DropZone = new Class({
 
 	_updateQueueProgress: function (){
 		
-		//console.log('UPDATE QUEUE?');
-		
 		var perc = 0,
 			n_checked = 0;
 		
@@ -387,23 +376,15 @@ var DropZone = new Class({
 			}
 		});
 		
-		//console.log('n_checked: ' + n_checked);
-		
 		if(n_checked == 0) return;
 		
 		this.queuePercent = perc / n_checked;
-		
-		/*console.log('UPDATE QUEUE!');
-		console.log(this.nUploaded + this.nCurrentUploads);
-		console.log(this.fileList.length-this.nCancelled);*/
 		
 		this.fireEvent('onUploadProgress', [this.queuePercent, this.nUploaded + this.nCurrentUploads, this.fileList.length-this.nCancelled]);
 		
 	},
 	
 	_queueComplete: function(){
-		
-		//console.log('_queueComplete');
 		
 		this.fireEvent('uploadComplete', [this.nUploaded, this.nErrors]);
 		
@@ -421,11 +402,6 @@ var DropZone = new Class({
 	},
 
 	_itemComplete: function(item, file, response){
-		
-		/*console.log('_itemComplete');
-		console.log(item);
-		console.log(file);
-		console.log(this.fileList[file.id]);/**/
 		
 		this.nCurrentUploads--;
 		this.nUploaded++;

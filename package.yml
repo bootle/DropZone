@@ -1,7 +1,7 @@
-name: DropZone
+name: DropZone Uploader
 author: bootle
 category: Utilities
 tags: [upload, html5, chunk, drag & drop, flash]
 docs: https://github.com/bootle/DropZone
 demo: http://thebootle.com/foof/moo/DropZone/Demo/
-#current: 0.9.1
+#current: 1.1

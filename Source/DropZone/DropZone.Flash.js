@@ -201,12 +201,8 @@ DropZone.Flash = new Class({
 
 	upload: function () {
 		
-		this.parent();
-		
 		if (!this.isUploading) {
-			
-			this.isUploading = true;
-			
+		
 			for (var i = 0, f; f = this.fileList[i]; i++) {
 				if (!f.uploading) {
 					
@@ -217,6 +213,8 @@ DropZone.Flash = new Class({
 				
 				}
 			}
+			
+			this.parent();
 
 		}
 

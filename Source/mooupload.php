@@ -36,12 +36,13 @@ class Mooupload
 	 *
 	 * Upload a file using HTML4 or Flash method
 	 * 
-	 * @param		string	Directory destination path 	 	 	 	 
+	 * @param		string	Directory destination path 	 	 
+	 * @param		string	File prefix (Useful for avoid file overwriting)	 	 	 
 	 * @param		boolean	Return response to the script	 
 	 * @return	array		Response
 	 * 	 	  	 
 	 */
-	public static function HTML4_upload($destpath, $send_response = TRUE)
+	public static function HTML4_upload($destpath, $file_prefix = '', $send_response = TRUE)
 	{
 	
 		// Normalize path
@@ -65,7 +66,7 @@ class Mooupload
 	    
 	    if ($response['error'] == 0)
 	    {
-	      if (move_uploaded_file($file['tmp_name'], $destpath.$file['name']) === FALSE)      
+	      if (move_uploaded_file($file['tmp_name'], $destpath.$file_prefix.$file['name']) === FALSE)      
 	        $response['error'] = UPLOAD_ERR_NO_TMP_DIR;
 	      else
 	        $response['finish'] = TRUE;
@@ -90,20 +91,16 @@ class Mooupload
 	 * @return	array		Response
 	 * 	 	  	 
 	 */
-	public static function HTML5_upload($destpath, $send_response = TRUE)
+	public static function HTML5_upload($destpath, $file_prefix = '', $send_response = TRUE)
 	{
-
+	
 		// Normalize path
 		$destpath = self::_normalize_path($destpath);
 			
 		// Check if path exist
 		if (!file_exists($destpath))
 			throw new Exception('Path do not exist!');
-		
-		
-	  // Read headers
-	  $response = array();
-	  $headers 	= self::_read_headers();		
+					
 		  	  	  
 	  
 	  $max_upload 	= self::_convert_size(ini_get('upload_max_filesize'));
@@ -111,9 +108,13 @@ class Mooupload
 	  $memory_limit = self::_convert_size(ini_get('memory_limit'));
 	  
 	  $limit = min($max_upload, $max_post, $memory_limit);
+	      
+	  // Read headers
+	  $response = array();
+		$headers 	= self::_read_headers();
 		
-      $response['id']    	= $_GET['X-File-Id'];
-	  $response['name']  	= basename($_GET['X-File-Name']); 	// Basename for security issues
+		$response['id']    	= $headers['X-File-Id'];
+	  $response['name']  	= basename($headers['X-File-Name']); 	// Basename for security issues
 	  $response['size']  	= $headers['Content-Length'];
 	  $response['error'] 	= UPLOAD_ERR_OK; 
 	  $response['finish'] = FALSE;
@@ -130,7 +131,7 @@ class Mooupload
 		
 		           
 	  // Is resume?	  
-		$flag = (bool)$_GET['X-File-Resume'] ? FILE_APPEND : 0;
+		$flag = (bool)$headers['X-File-Resume'] ? FILE_APPEND : 0;
 	  
 	  $filename = $response['id'].'_'.$response['name'];
 	  
@@ -143,12 +144,12 @@ class Mooupload
 	    $response['error'] = UPLOAD_ERR_CANT_WRITE;
 	  else
 	  {
-	    if (filesize($destpath.$filename) == $_GET['X-File-Size'])
+	    if (filesize($destpath.$filename) == $headers['X-File-Size'])
 	    {
 	      $response['finish'] = TRUE;
 	      
 	      /* If uploaded file is finished, maybe you are interested in saving, registering or moving the file */
-				// my_save_file($destpath.$filename, $response['name']);
+				// my_save_file($destpath.$filename, $file_prefix.$response['name']);
 	    }
 	  } 
 	    
@@ -175,9 +176,9 @@ class Mooupload
 	 * @return	array		Response
 	 * 
 	 */
-	public static function upload($destpath, $send_response = TRUE)
+	public static function upload($destpath, $file_prefix = '', $send_response = TRUE)
 	{			
-		return self::is_HTML5_upload() ? self::HTML5_upload($destpath, $send_response) : self::HTML4_upload($destpath, $send_response);		
+		return self::is_HTML5_upload() ? self::HTML5_upload($destpath, $file_prefix, $send_response) : self::HTML4_upload($destpath, $file_prefix, $send_response);		
 	}	 		 	 	
 	
 	
@@ -243,7 +244,7 @@ class Mooupload
 			$headers = array();
 			$headers['Content-Length'] 	= $_SERVER['CONTENT_LENGTH'];
 			$headers['X-File-Id'] 			= $_SERVER['HTTP_X_FILE_ID'];
-			$headers['X-File-Name'] 		= $_SERVER['HTTP_X_FILE_NAME'];
+			$headers['X-File-Name'] 		= $_SERVER['HTTP_X_FILE_NAME'];			
 			$headers['X-File-Resume'] 	= $_SERVER['HTTP_X_FILE_RESUME'];
 			$headers['X-File-Size'] 		= $_SERVER['HTTP_X_FILE_SIZE'];
 		}

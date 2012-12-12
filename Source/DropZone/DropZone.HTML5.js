@@ -32,6 +32,8 @@ DropZone.HTML5 = new Class({
 		
 	},
 	
+	bound: {},
+	
 	activate: function (){
 		
 		this.parent();
@@ -94,15 +96,15 @@ DropZone.HTML5 = new Class({
 			
 			// prevent defaults on window
 			
-			this.bounds = {
+			this.bound = {
 				stopEvent: this._stopEvent.bind(this)
 			}
 		
 			$(document.body).addEvents({
-				'dragenter': this.bounds.stopEvent,
-				'dragleave': this.bounds.stopEvent,
-				'dragover': this.bounds.stopEvent,
-				'drop': this.bounds.stopEvent
+				'dragenter': this.bound.stopEvent,
+				'dragleave': this.bound.stopEvent,
+				'dragover': this.bound.stopEvent,
+				'drop': this.bound.stopEvent
 			});
 			
 		}
@@ -125,17 +127,13 @@ DropZone.HTML5 = new Class({
 				file.uploading = true;
 				this.nCurrentUploads++;
 				
-				/*console.log(' ');
-				console.log('----------------------');
-				console.log('Starting upload: ' + i + ' file: ' + file.name);*/
-				
 				this._html5Send(file, 0, false);
 				
-				this.parent();
-		
 			}
 
 		}, this);
+		
+		this.parent();
 				
 	},
 
@@ -157,19 +155,17 @@ DropZone.HTML5 = new Class({
 
 		// Get slice method
 		
-		if (file.file.mozSlice) // Mozilla based
-			chunk = file.file.mozSlice(start, total);
-		else if (file.file.webkitSlice) // Chrome and webkit based (but not yet Safari)
-			chunk = file.file.webkitSlice(start, total);
-		else if (file.file.slice) // Opera and other standards browsers
+		if (file.file.slice) // Standard browsers
 			chunk = file.file.slice(start, total);
+		else if (file.file.mozSlice) // Mozilla based
+			chunk = file.file.mozSlice(start, total);
+		else if (file.file.webkitSlice) // Chrome 20- and webkit based
+			chunk = file.file.webkitSlice(start, total);
 		else { // Safari
-		
 			// send as form data instead of Blob
 			chunk = new FormData();
 			chunk.append('file', file.file);
 			is_blob = false;
-			
 		}
 		
 		// Set headers
@@ -205,11 +201,6 @@ DropZone.HTML5 = new Class({
 				}
 			}.bind(this),
 			onSuccess: function (response) {
-				
-				/*console.log('XHR success:');
-				console.log(file.id);
-				console.log(file);
-				console.log(this.fileList[file.id]);*/
 				
 				try {
 					response = JSON.decode(response, true);
@@ -280,11 +271,11 @@ DropZone.HTML5 = new Class({
 		
 		// remove events
 		
-		$(document.body).removeEvents({
-			'dragenter': this.bounds.stopEvent,
-			'dragleave': this.bounds.stopEvent,
-			'dragover': this.bounds.stopEvent,
-			'drop': this.bounds.stopEvent
+		if(this.uiDropArea) $(document.body).removeEvents({
+			'dragenter': this.bound.stopEvent,
+			'dragleave': this.bound.stopEvent,
+			'dragover': this.bound.stopEvent,
+			'drop': this.bound.stopEvent
 		});
 		
 	},
