@@ -143,7 +143,7 @@ DropZone.HTML5 = new Class({
 		//if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + (file.uniqueid));
 		// now getting the item globally in case it was moved somewhere else in onItemAdded event
 		// this way it can always remain controlled
-		item = $('dropzone_item_' + file.uniqueid);
+		item = $('dropzone_item_' + file.uniqueid + '_' + file.id);
 		
 		var end = this.options.block_size,
 			chunk,
@@ -208,40 +208,48 @@ DropZone.HTML5 = new Class({
 					response = '';
 				}
 				
-				if (this._checkResponse(response) && typeof this.fileList[file.id] != 'undefined') {
-					
-					if (response.finish == true) { // || total >= file.size // sometimes the size is measured wrong and fires too early?
+				if(typeof this.fileList[file.id] != 'undefined' && !this.fileList[file.id].cancelled){
+				
+					if (this._checkResponse(response)) {
 						
-						// job done!
-						
-						this._itemComplete(item, file, response);
-
-						if (this.nCurrentUploads != 0 && this.nCurrentUploads < this.options.max_queue && file.checked) this.upload();
-
-					} else {
-						
-						// in progress..
-						
-						if(file.checked) {
+						if (response.finish == true) { // || total >= file.size // sometimes the size is measured wrong and fires too early?
 							
-							var perc = (total / file.size) * 100;
+							// job done!
 							
-							// it's used to calculate global progress
-							this.fileList[file.id].progress = perc;
+							this._itemComplete(item, file, response);
+	
+							if (this.nCurrentUploads != 0 && this.nCurrentUploads < this.options.max_queue && file.checked) this.upload();
+	
+						} else {
 							
-							this._itemProgress(item, perc);
+							// in progress..
 							
-							this._html5Send(file, start + response.size.toInt(), true) // Recursive upload
+							if(file.checked) {
+								
+								var perc = (total / file.size) * 100;
+								
+								// it's used to calculate global progress
+								this.fileList[file.id].progress = perc;
+								
+								this._itemProgress(item, perc);
+								
+								this._html5Send(file, start + response.size.toInt(), true) // Recursive upload
+								
+							}
 							
 						}
+						
+					} else {
+						
+						// response errror!
+						
+						this._itemError(item, file, response);
 						
 					}
 					
 				} else {
 					
-					// errror!
-					
-					this._itemError(item, file, response);
+					// item doesn't exist anymore, probably cancelled
 					
 				}
 
