@@ -140,7 +140,7 @@ DropZone.Flash = new Class({
 									
 					var item,
 						perc = r[0].progress.percentLoaded;
-					if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + file.uniqueid);
+					if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + file.uniqueid + '_' + file.id);
 					
 					// set file progress
 					file.progress = perc;
@@ -158,7 +158,7 @@ DropZone.Flash = new Class({
 					file.uploaded = true;
 					
 					var item;
-					if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + file.uniqueid);
+					if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + file.uniqueid + '_' + file.id);
 										
 					// get response right
 					

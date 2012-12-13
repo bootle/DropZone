@@ -70,14 +70,14 @@ DropZone.HTML4 = new Class({
 				var file = this.fileList[response.key];
 				
 				var item;
-				if (this.uiList && response) var item = this.uiList.getElement('#dropzone_item_' + this.fileList[response.key].uniqueid);
+				if (this.uiList && response) var item = this.uiList.getElement('#dropzone_item_' + file.uniqueid + '_' + file.id);
 				
 				if (this._checkResponse(response)) {
 				
-					this.fileList[response.key].uploaded = true;
+					file.uploaded = true;
 
 					// Complete file information from server side
-					this.fileList[response.key].size = response.size;
+					file.size = response.size;
 					
 					this._itemComplete(item, file, response);
 										

@@ -227,9 +227,12 @@ var DropZone = new Class({
 	
 	cancel: function(id, item) {
 		
+		//console.log('DZ: cancel', id, item);
+		
 		if(this.fileList[id]){
 			
 			this.fileList[id].checked = false;
+			this.fileList[id].cancelled = true;
 			
 			if(this.fileList[id].error) {
 				this.nErrors--;
@@ -240,14 +243,10 @@ var DropZone = new Class({
 		}
 		
 		this.nCancelled++;
-				
+		
 		if(this.nCurrentUploads <= 0) this._queueComplete();
 		
 		this.fireEvent('onItemCancel', [item]);
-		
-		// try to upload next
-		
-		this.upload();
 		
 	},
 	
@@ -292,20 +291,7 @@ var DropZone = new Class({
 	// creates hidden input elements to handle file uploads nicely
 	
 	_newInput: function (formcontainer) {
-		
-		// Hide old input
-		
-		/*var inputsnum = this._countInputs();
-		if (inputsnum > 0) {
-			this.hiddenContainer.getElement('#tbxFile_' + (inputsnum - 1)).setStyles({
-				top: 0,
-				left: 0,
-				styles: {
-					display: 'none'
-				}
-			});
-		}*/
-		
+				
 		if(!formcontainer) formcontainer = this.hiddenContainer;
 		
 		// Input File
@@ -403,6 +389,10 @@ var DropZone = new Class({
 
 	_itemComplete: function(item, file, response){
 		
+		if(file.cancelled) return;
+		
+		//console.log('DZ: _itemComplete', item, file, response);
+		
 		this.nCurrentUploads--;
 		this.nUploaded++;
 				
@@ -418,6 +408,8 @@ var DropZone = new Class({
 	},
 
 	_itemError: function(item, file, response){
+		
+		// console.log('DZ: _itemError', item, file, response);
 		
 		this.nCurrentUploads--;
 		this.nErrors++;
@@ -439,19 +431,19 @@ var DropZone = new Class({
 		
 		var item = new Element('div', {
 			'class': 'dropzone_item',
-			'id': 'dropzone_item_' + file.uniqueid
+			'id': 'dropzone_item_' + file.uniqueid + '_' + file.id
 		}).inject(this.uiList);
 		
 		// check file type, and get thumb if it's an image
 		
 		// Get the URL object (unavailable in Safari 5-)
-		window.URL = window.webkitURL || window.URL;
+		window.URL = window.URL || window.webkitURL;
 		
 		if (file.type.match('image') && window.URL) { //typeof FileReader !== 'undefined' && 
 						
 			// measure size of the blob image
 			
-			var img = new Element('img', {'style': 'display: none'});
+			var img = new Element('img', {'style': 'visibility: hidden'});
 			img.addEvent('load', function(e) {
 				this.fireEvent('itemAdded', [item, file, img.src, img.getSize()]); // e.target.result for large images crashes Chrome?
 				window.URL.revokeObjectURL(img.src); // Clean up after yourself.
