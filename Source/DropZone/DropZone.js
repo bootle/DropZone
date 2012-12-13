@@ -448,37 +448,16 @@ var DropZone = new Class({
 		window.URL = window.webkitURL || window.URL;
 		
 		if (file.type.match('image') && window.URL) { //typeof FileReader !== 'undefined' && 
-				
-			/*
+						
+			// measure size of the blob image
 			
-			// this crashes Chrome with large images
-			
-			reader = new FileReader();
-			reader.onload = function (e) {
-				this.fireEvent('itemAdded', [item, file, e.target.result]); // e.target.result for large images crashes Chrome?
-			}.bind(this);
-			
-			reader.readAsDataURL(file.file);
-			*/
-			
-			// this approach works fine in Chrome
-			// but waiting for file to load breaks the queue order..
-			
-			var img = new Element('img'); //, {'style': 'display: none'}
+			var img = new Element('img', {'style': 'display: none'});
 			img.addEvent('load', function(e) {
-				
-				// job done
 				this.fireEvent('itemAdded', [item, file, img.src, img.getSize()]); // e.target.result for large images crashes Chrome?
-				
 				window.URL.revokeObjectURL(img.src); // Clean up after yourself.
-				
 				img.destroy();
-				
 			}.bind(this));
-			
 			img.src = window.URL.createObjectURL(file.file);
-			
-			// add the invisible picture to load
 			this.gravityCenter.adopt(img);
 			
 		} else {
