@@ -216,7 +216,7 @@ DropZone.HTML5 = new Class({
 						
 						this._itemComplete(item, file, response);
 
-						if (this.nCurrentUploads < this.options.max_queue && file.checked) this.upload(); //this.nCurrentUploads != 0 && 
+						if (this.nCurrentUploads != 0 && this.nCurrentUploads < this.options.max_queue && file.checked) this.upload();
 
 					} else {
 						
