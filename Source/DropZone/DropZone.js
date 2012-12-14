@@ -215,11 +215,14 @@ var DropZone = new Class({
 	
 	upload: function () {
 		
-		this.isUploading = true;
+		if(!this.isUploading){
 		
-		this._updateQueueProgress();
-		
-		this.fireEvent('onUploadStart');
+			this.isUploading = true;
+			this.fireEvent('onUploadStart');
+			
+			this._updateQueueProgress();
+			
+		}
 
 	},
 	
@@ -372,6 +375,8 @@ var DropZone = new Class({
 	
 	_queueComplete: function(){
 		
+		this.isUploading = false;
+		
 		this.fireEvent('uploadComplete', [this.nUploaded, this.nErrors]);
 		
 		if(this.nErrors==0) this.reset();
@@ -409,7 +414,7 @@ var DropZone = new Class({
 
 	_itemError: function(item, file, response){
 		
-		// console.log('DZ: _itemError', item, file, response);
+		console.log('DZ: _itemError', item, file, response);
 		
 		this.nCurrentUploads--;
 		this.nErrors++;

@@ -123,7 +123,6 @@ DropZone.HTML5 = new Class({
 			if (file.checked && !file.uploading && this.nCurrentUploads < this.options.max_queue) {
 			// Upload only checked and new files
 
-				//this.isUploading = true;
 				file.uploading = true;
 				this.nCurrentUploads++;
 				
@@ -313,7 +312,7 @@ DropZone.HTML5 = new Class({
 				
 		if(this.nCurrentUploads == 0)
 			this._queueComplete();
-		else if (this.nCurrentUploads < this.options.max_queue) //this.nCurrentUploads != 0 && 
+		else if (this.nCurrentUploads != 0 && this.nCurrentUploads < this.options.max_queue)
 			this.upload();
 		
 	},
