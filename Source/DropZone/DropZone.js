@@ -166,7 +166,7 @@ var DropZone = new Class({
 	addFiles: function (files) {
 		
 		for (var i = 0, f; f = files[i]; i++) {
-
+		
 			var fname = f.name || f.fileName;
 			var fsize = f.size || f.fileSize;
 			
@@ -203,7 +203,7 @@ var DropZone = new Class({
 			if (this.uiList) this._addNewItem(this.fileList[this.fileList.length - 1]);
 
 		}
-
+		
 		// fire!
 		this.fireEvent('onAddFiles', [this.fileList.length]);
 
@@ -414,8 +414,6 @@ var DropZone = new Class({
 
 	_itemError: function(item, file, response){
 		
-		console.log('DZ: _itemError', item, file, response);
-		
 		this.nCurrentUploads--;
 		this.nErrors++;
 		
@@ -454,6 +452,14 @@ var DropZone = new Class({
 				window.URL.revokeObjectURL(img.src); // Clean up after yourself.
 				img.destroy();
 			}.bind(this));
+			
+			// if image is corrupted
+			img.addEvent('error', function(e) {
+				this.fireEvent('itemAdded', [item, file]); // e.target.result for large images crashes Chrome?
+				window.URL.revokeObjectURL(img.src); // Clean up after yourself.
+				img.destroy();
+			}.bind(this));
+			
 			img.src = window.URL.createObjectURL(file.file);
 			this.gravityCenter.adopt(img);
 			
