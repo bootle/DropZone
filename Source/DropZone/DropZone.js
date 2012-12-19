@@ -446,7 +446,7 @@ var DropZone = new Class({
 						
 			// measure size of the blob image
 			
-			var img = new Element('img', {'style': 'visibility: hidden'});
+			var img = new Element('img', {'style': 'visibility: hidden; position: absolute;'});
 			img.addEvent('load', function(e) {
 				this.fireEvent('itemAdded', [item, file, img.src, img.getSize()]); // e.target.result for large images crashes Chrome?
 				window.URL.revokeObjectURL(img.src); // Clean up after yourself.

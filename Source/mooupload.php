@@ -6,7 +6,9 @@
  * Provides a easy way for recept and save files from MooUpload
  * 
  * DISCLAIMER: You must add your own special rules for limit the upload of
- * insecure files like .php, .asp or .htaccess     
+ * insecure files like .php, .asp or .htaccess
+ *
+ * DropZone DISCLAIMER: DropZone is a front-end project. This PHP class is provided with DropZone just for demo purposes, you gotta modify it to work with your website.
  * 
  * @author: Juan Lago <juanparati[at]gmail[dot].com>
  * 
@@ -113,9 +115,9 @@ class Mooupload
 	  $response = array();
 		$headers 	= self::_read_headers();
 		
-		$response['id']    	= $headers['X-File-Id'];
-	  $response['name']  	= basename($headers['X-File-Name']); 	// Basename for security issues
-	  $response['size']  	= $headers['Content-Length'];
+      $response['id']    	= $_GET['X-File-Id'];
+	  $response['name']  	= basename($_GET['X-File-Name']); 	// Basename for security issues
+	  $response['size']  	= $_GET['Content-Length'];
 	  $response['error'] 	= UPLOAD_ERR_OK; 
 	  $response['finish'] = FALSE;
 	    
@@ -131,7 +133,7 @@ class Mooupload
 		
 		           
 	  // Is resume?	  
-		$flag = (bool)$headers['X-File-Resume'] ? FILE_APPEND : 0;
+		$flag = (bool) $_GET['X-File-Resume'] ? FILE_APPEND : 0;
 	  
 	  $filename = $response['id'].'_'.$response['name'];
 	  
@@ -243,10 +245,10 @@ class Mooupload
 		{
 			$headers = array();
 			$headers['Content-Length'] 	= $_SERVER['CONTENT_LENGTH'];
-			$headers['X-File-Id'] 			= $_SERVER['HTTP_X_FILE_ID'];
-			$headers['X-File-Name'] 		= $_SERVER['HTTP_X_FILE_NAME'];			
+			$headers['X-File-Id'] 		= $_SERVER['HTTP_X_FILE_ID'];
+			$headers['X-File-Name'] 	= $_SERVER['HTTP_X_FILE_NAME'];			
 			$headers['X-File-Resume'] 	= $_SERVER['HTTP_X_FILE_RESUME'];
-			$headers['X-File-Size'] 		= $_SERVER['HTTP_X_FILE_SIZE'];
+			$headers['X-File-Size'] 	= $_SERVER['HTTP_X_FILE_SIZE'];
 		}
 		
 		return $headers;
