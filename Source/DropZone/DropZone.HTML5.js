@@ -154,13 +154,13 @@ DropZone.HTML5 = new Class({
 
 		// Get slice method
 		
-		if (file.file.slice) // Standard browsers
+		if (file.file.slice) { // Standard browsers
 			chunk = file.file.slice(start, total);
-		else if (file.file.mozSlice) // Mozilla based
+		} else if (file.file.mozSlice) { // Mozilla based
 			chunk = file.file.mozSlice(start, total);
-		else if (file.file.webkitSlice) // Chrome 20- and webkit based
+		} else if (file.file.webkitSlice && !Browser.safari) {// Chrome 20- and webkit based // Safari slices the file badly
 			chunk = file.file.webkitSlice(start, total);
-		else { // Safari
+		} else { // Safari 5-
 			// send as form data instead of Blob
 			chunk = new FormData();
 			chunk.append('file', file.file);

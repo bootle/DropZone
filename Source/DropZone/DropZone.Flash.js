@@ -47,35 +47,33 @@ DropZone.Flash = new Class({
 		
 		this.parent();
 		
-	},
-	
-	reset: function(){
+		// add hover effect to button
+		// so it always re-positions flash before click
 		
-		this.parent();
+		this.uiButton.addEvent('mouseenter', this.positionContainer.bind(this));
 		
 		// Translate file type filter
 		var filters = this._flashFilter(this.options.accept);
 
 		var btn = this.uiButton;
-		var btnposition = btn.getPosition(btn.getOffsetParent());
 		var btnsize = btn.getSize();
 		
 		// Create container for flash
-		var flashcontainer = new Element('div', {
+		this.flashContainer = new Element('div', {
 			id: 'dropzone_flash_wrap',
 			styles: {
-				position: 'absolute',
-				top: btnposition.y,
-				left: btnposition.x
+				position: 'absolute'
 			}
 		}).inject(this.hiddenContainer);
+		
+		this.positionContainer();
 
 		// Prevent IE cache bug
 		if (Browser.ie) this.options.flash.movie += (this.options.flash.movie.contains('?') ? '&' : '?') + 'dropzone_anti_cache=' + Date.now();
 		
 		// Deploy flash movie
 		this.flashObj = new Swiff(this.options.flash.movie, {
-			container: flashcontainer.get('id'),
+			container: this.flashContainer.get('id'),
 			width: btnsize.x,
 			height: btnsize.y,
 			params: {
@@ -136,7 +134,7 @@ DropZone.Flash = new Class({
 				fileProgress: function (r) {
 					
 					// get the right file object
-					var file = this.fileList[r[0].id-1];
+					var file = this.fileList[r[0].id];
 									
 					var item,
 						perc = r[0].progress.percentLoaded;
@@ -152,7 +150,7 @@ DropZone.Flash = new Class({
 				fileComplete: function (r) {
 					
 					// get the right file object
-					var file = this.fileList[r[0].id-1];
+					var file = this.fileList[r[0].id];
 					
 					// set to uploaded
 					file.uploaded = true;
@@ -185,17 +183,13 @@ DropZone.Flash = new Class({
 			}
 		});
 		
-		// toElement() method doesn't work in IE
-		/*
-		var flashElement = this.flashObj.toElement();
+	},
+	
+	reset: function(){
 		
-		// Check flash load
-		if (!flashElement.getParent() || flashElement.getStyle('display') == 'none')
-		{
-		  subcontainer.set('html', this.options.texts.noflash);
-		  return false;
-		}
-		*/
+		this.parent();
+		
+		this.positionContainer();
 		
 	},
 
@@ -204,20 +198,33 @@ DropZone.Flash = new Class({
 		if (!this.isUploading) {
 		
 			for (var i = 0, f; f = this.fileList[i]; i++) {
-				if (!f.uploading) {
-					
-					// delay to fix problem in IE8
-					(function(){
-						Swiff.remote(this.flashObj.toElement(), 'xFileStart', i);
-					}).delay(10, this);
 				
+				if (!f.uploading) {
+					// delay to fix problem in IE8
+					//(function(){
+						Swiff.remote(this.flashObj.toElement(), 'xFileStart', i);
+					//}).delay(10, this);
 				}
+				
 			}
 			
 			this.parent();
 
 		}
 
+	},
+	
+	positionContainer: function(){
+	
+		if(!this.flashContainer) return;
+		
+		var btn = this.uiButton;
+		var btnposition = btn.getPosition(btn.getOffsetParent());
+		this.flashContainer.setStyles({
+			top: btnposition.y,
+			left: btnposition.x
+		});
+			
 	},
 
 	_flashFilter: function (filters) {
@@ -264,7 +271,7 @@ DropZone.Flash = new Class({
 	cancel: function (id, item) {
 		
 		this.parent(id, item);
-		Swiff.remote(this.flashObj.toElement(), 'xFileRemove', id + 1);
+		Swiff.remote(this.flashObj.toElement(), 'xFileRemove', id);
 		
 	}
 

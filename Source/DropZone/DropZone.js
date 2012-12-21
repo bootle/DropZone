@@ -133,10 +133,6 @@ var DropZone = new Class({
 	
 	activate: function(){
 		
-		// Add vars to URL (query string)
-		
-		this.url = this.options.url + ((!this.options.url.match('\\?')) ? '?' : '&') + Object.toQueryString(this.options.vars)
-		
 		// set UI elements
 		
 		this.uiButton = $(this.options.ui_button);
@@ -489,6 +485,9 @@ var DropZone = new Class({
 	},
 	
 	reset: function(){
+		
+		// Add vars to URL (query string)
+		this.url = this.options.url + ((!this.options.url.match('\\?')) ? '?' : '&') + Object.toQueryString(this.options.vars)
 		
 		this.fileList = new Array();
 		this.lastInput = undefined; // stores new, currently unused hidden input field
