@@ -125,8 +125,6 @@ var DropZone = new Class({
 			
 			return new DropZone[this.method](options);
 			
-		} else {
-			
 		}
 		
 	},
@@ -225,8 +223,6 @@ var DropZone = new Class({
 	// cancels a specified item
 	
 	cancel: function(id, item) {
-		
-		//console.log('DZ: cancel', id, item);
 		
 		if(this.fileList[id]){
 			
@@ -391,8 +387,6 @@ var DropZone = new Class({
 	_itemComplete: function(item, file, response){
 		
 		if(file.cancelled) return;
-		
-		//console.log('DZ: _itemComplete', item, file, response);
 		
 		this.nCurrentUploads--;
 		this.nUploaded++;

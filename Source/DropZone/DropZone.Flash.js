@@ -41,38 +41,35 @@ DropZone.Flash = new Class({
 	},
 	
 	activate: function () {
-		
-		// set options
-		//this.setOptions(options);
-		
+				
+		// activate parent
 		this.parent();
 		
 		// add hover effect to button
 		// so it always re-positions flash before click
-		
 		this.uiButton.addEvent('mouseenter', this.positionContainer.bind(this));
 		
-		// Translate file type filter
-		var filters = this._flashFilter(this.options.accept);
-
+		this.positionContainer();
+		
+	},
+	
+	createFlash: function(){
+		
 		var btn = this.uiButton;
 		var btnsize = btn.getSize();
 		
+		var uid = String.uniqueID();
+		
 		// Create container for flash
 		this.flashContainer = new Element('div', {
-			id: 'dropzone_flash_wrap',
+			id: 'dropzone_flash_wrap_' + uid,
 			styles: {
 				position: 'absolute'
 			}
 		}).inject(this.hiddenContainer);
 		
-		this.positionContainer();
-
-		// Prevent IE cache bug
-		if (Browser.ie) this.options.flash.movie += (this.options.flash.movie.contains('?') ? '&' : '?') + 'dropzone_anti_cache=' + Date.now();
-		
 		// Deploy flash movie
-		this.flashObj = new Swiff(this.options.flash.movie, {
+		this.flashObj = new Swiff(this.options.flash.movie + (this.options.flash.movie.contains('?') ? '&' : '?') + uid, { // add randomid to prevent caching in IE
 			container: this.flashContainer.get('id'),
 			width: btnsize.x,
 			height: btnsize.y,
@@ -91,7 +88,7 @@ DropZone.Flash = new Class({
 						queued: this.options.max_queue,
 						fileSizeMin: this.options.min_file_size,
 						fileSizeMax: this.options.max_file_size,
-						typeFilter: filters,
+						typeFilter: this._flashFilter(this.options.accept),
 						mergeData: true,
 						data: this._cookieData(),
 						verbose: true
@@ -138,6 +135,7 @@ DropZone.Flash = new Class({
 									
 					var item,
 						perc = r[0].progress.percentLoaded;
+					if(perc > 100) perc = 100; // in case backend or flash mess something up
 					if (this.uiList) item = this.uiList.getElement('#dropzone_item_' + file.uniqueid + '_' + file.id);
 					
 					// set file progress
@@ -186,9 +184,9 @@ DropZone.Flash = new Class({
 	},
 	
 	reset: function(){
-		
+	
 		this.parent();
-		
+		this.createFlash();
 		this.positionContainer();
 		
 	},
@@ -196,16 +194,9 @@ DropZone.Flash = new Class({
 	upload: function () {
 		
 		if (!this.isUploading) {
-		
+			
 			for (var i = 0, f; f = this.fileList[i]; i++) {
-				
-				if (!f.uploading) {
-					// delay to fix problem in IE8
-					//(function(){
-						Swiff.remote(this.flashObj.toElement(), 'xFileStart', i);
-					//}).delay(10, this);
-				}
-				
+				if (!f.uploading) Swiff.remote(this.flashObj.toElement(), 'xFileStart', i);
 			}
 			
 			this.parent();
@@ -220,6 +211,7 @@ DropZone.Flash = new Class({
 		
 		var btn = this.uiButton;
 		var btnposition = btn.getPosition(btn.getOffsetParent());
+		
 		this.flashContainer.setStyles({
 			top: btnposition.y,
 			left: btnposition.x
